@@ -13,7 +13,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function titleToSuiteId(title) {
 	const match = title.match(/\bT?S(\d+)\b/g);
-	return match.length ? match[0] : '';
+	if (!match) {
+		throw new Error(`Suite id is not detected in test name`);
+	}
+	return match[0];
+}
+
+function fullTitleToBrowserName(fullTitle) {
+  const regex = /<-(.*)->/g;
+  const match = regex.exec(fullTitle);
+  if (!match) {
+  	throw new Error(`Browser name is not detected in full test name`);
+	}
+  return match[1];
 }
 
 class TestRailReporter extends _reporter.default {
@@ -71,7 +83,8 @@ class TestRailReporter extends _reporter.default {
 			return {
 				case_id: caseId,
 				status_id: Status.Passed,
-				comment: `${this.getRunComment(test)}`
+				comment: `${this.getRunComment(test)}`,
+        browserName: fullTitleToBrowserName(test.fullTitle),
 			};
 		});
 		this._results[suiteId] = this._results[suiteId] || [];
@@ -92,7 +105,8 @@ class TestRailReporter extends _reporter.default {
 				comment: `${this.getRunComment(test)}
 				${test.error.message}
 				${test.error.stack}
-				`
+				`,
+        browserName: fullTitleToBrowserName(test.fullTitle),
 			};
 		});
 		this._results[suiteId] = this._results[suiteId] || [];

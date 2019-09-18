@@ -143,9 +143,11 @@ class TestRail {
   /**
    * @param {string} name
    * @param {string} description
+   * @param {string} browserName
+   * @param {string} suiteId
    * @return {*}
    */
-  addRun(name, description, suiteId) {
+  addRun(name, description, browserName, suiteId) {
     const run = this._post(`add_run/${this.options.projectId}`, {
       "suite_id": suiteId || this.options.suiteId,
       "name": name,
@@ -153,7 +155,7 @@ class TestRail {
       "assignedto_id": this.options.assignedToId,
       "include_all": true
     });
-    this.writeRunId(run.id);
+    this.writeRunId(run.id, browserName);
     return run.id;
   }
 
@@ -166,7 +168,7 @@ class TestRail {
    * @param {callback} callback
    */
   publish(name, description, suiteId, results, callback = undefined) {
-    const runId = this.getRunId() || this.addRun(name, description, suiteId);
+    const runId = this.getRunId(results[0].browserName) || this.addRun(name, description, results[0].browserName, suiteId);
     console.log(`Publishing results to ${this.base}?/runs/view/${runId}`);
     let body = this.addResultsForCases(runId, results);
     // execute callback if specified
@@ -187,14 +189,15 @@ class TestRail {
   }
 
 
-  getRunId() {
-    return fs.existsSync(this.runIdPath)
-      ? fs.readFileSync(this.runIdPath)
+  getRunId(browserName) {
+    const path = this.runIdPath + browserName;
+    return fs.existsSync(path)
+      ? fs.readFileSync(path)
       : null;
   }
 
-  writeRunId(id) {
-    fs.writeFileSync(this.runIdPath, id);
+  writeRunId(id, browserName) {
+    fs.writeFileSync(this.runIdPath + browserName, id);
   }
 }
 

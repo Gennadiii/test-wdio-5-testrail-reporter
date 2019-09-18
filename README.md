@@ -28,6 +28,15 @@ let WdioTestRailReporter = require('wdio-5-testrail-reporter');
       runName: "My test run"
     }]]
 ```
+Mark your mocha suite names with browser name (it can be test name of in any "describe" name). Ensure that it is well distinct from descriptions by pattern <-browser->.
+ 
+```Javascript
+describe("<-chrome-> Authenticate with invalid user", . . .
+describe("Authenticate a valid user S21", () => {
+  describe("<-firefox-> Authenticate with invalid user", . . .
+}). . .
+```
+
 Mark your mocha suite names with ID of Testrail test suites. Ensure that your suite ids are well distinct from descriptions.
  
 ```Javascript
