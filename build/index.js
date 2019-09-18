@@ -26,7 +26,7 @@ class TestRailReporter extends _reporter.default {
     }, options);
 
 	super(options); // Keep track of the order that suites were called
-		
+
     this.stateCounts = {
       passed: 0,
       failed: 0,
@@ -39,7 +39,7 @@ class TestRailReporter extends _reporter.default {
 	this._out = [];
 	this.testRail = new TestRail(options);
   }
-  
+
   /**
    * @param {{title}} test
    * @return {string}
@@ -52,16 +52,16 @@ class TestRailReporter extends _reporter.default {
   /**
    * @param {{caps}} capabilities
    * @return {string}
-   */  
+   */
   getCapabilitiesStr(caps) {
 	  const browser = caps.browserName || caps.browser;
     return `${caps.os ? caps.os + ' ' : ''}${caps.os_version ? caps.os_version + ', ' : ''}${caps.device ? caps.device + ', ' : ''}${browser ? browser + ' ' : ''} ${caps.browser_version ? caps.browser_version + ', ' : ''}${caps['browserstack.geoLocation'] ? caps['browserstack.geoLocation'] : ''}`;
 	}
-  
+
   onTestPass(test) {
 
     this.stateCounts.passed++;
-	
+
 	this._passes++;
 	this._out.push(test.title + ': pass');
 	let caseIds = titleToCaseIds(test.title);
@@ -75,7 +75,7 @@ class TestRailReporter extends _reporter.default {
 			};
 		});
 		this._results[suiteId] = this._results[suiteId] || [];
-		this._results[suiteId].push(...results);
+		this._results[suiteId].unshift(...results);
 	}
   }
 
@@ -125,7 +125,7 @@ class TestRailReporter extends _reporter.default {
 	  `;
 
   	for (let suiteId in this._results) {
-	  	this.testRail.publish(name, description, suiteId.replace('S', ''), this._results[suiteId]);			
+	  	this.testRail.publish(name, description, suiteId.replace('S', ''), this._results[suiteId]);
 	  }
   }
 }
