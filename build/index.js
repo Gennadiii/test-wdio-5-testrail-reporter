@@ -73,9 +73,7 @@ class TestRailReporter extends _reporter.default {
   }
 
   onTestPass(test) {
-
     this.stateCounts.passed++;
-
     this._passes++;
     this._out.push(test.title + ': pass');
     let caseIds = titleToCaseIds(test.title);
@@ -116,8 +114,24 @@ class TestRailReporter extends _reporter.default {
     }
   }
 
-  onTestSkip() {
+  onTestSkip(test) {
     this.stateCounts.skipped++;
+    this._pending++;
+    this._out.push(test.title + ': skipped');
+    let caseIds = titleToCaseIds(test.title);
+    let suiteId = titleToSuiteId(test.fullTitle) || this.options.suiteId;
+    if (caseIds.length > 0) {
+      let results = caseIds.map(caseId => {
+        return {
+          case_id: caseId,
+          status_id: Status.Retest,
+          comment: `${this.getRunComment(test)}`,
+          browserName: fullTitleToBrowserName(test.fullTitle),
+        };
+      });
+      this._results[suiteId] = this._results[suiteId] || [];
+      this._results[suiteId].push(...results);
+    }
   }
 
   onRunnerEnd(runner) {
