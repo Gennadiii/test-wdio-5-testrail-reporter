@@ -140,22 +140,16 @@ class TestRailReporter extends _reporter.default {
         "You may use script generate-cases to do it automatically.");
       return;
     }
-
     let executionDateTime = new Date();
-    let total = this._passes + this._fails + this._pending;
-    let runName = this.options.runName || 'WebDriver.io test rail reporter';
-    let caps = this.getCapabilitiesStr(runner.capabilities);
-    let name = `${runName} on ${caps}: automated test run ${executionDateTime}`;
-    let description = `${name}
-	  Execution summary:
-	  Passes: ${this._passes}
-  	Fails: ${this._fails}
-	  Pending: ${this._pending}
-	  Total: ${total}
-	  `;
+    let descriptionData = {
+      passed: this._passes,
+      failed: this._fails,
+      pending: this._pending,
+      total: this._passes + this._fails + this._pending,
+    };
 
     for (let suiteId in this._results) {
-      this.testRail.publish(name, description, suiteId.replace('S', ''), this._results[suiteId]);
+      this.testRail.publish(executionDateTime, this.options.runName, descriptionData, suiteId.replace('S', ''), this._results[suiteId]);
     }
   }
 }

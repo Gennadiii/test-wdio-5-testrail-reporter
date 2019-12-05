@@ -14,7 +14,6 @@ class TestRail {
     this._validate(options, 'username');
     this._validate(options, 'password');
     this._validate(options, 'projectId');
-    this._validate(options, 'projectId');
 
     // compute base url
     this.options = options;
@@ -155,26 +154,52 @@ class TestRail {
       "assignedto_id": this.options.assignedToId,
       "include_all": true
     });
-    this.writeRunId(run.id, browserName);
+    this.writeRunId(run.id, browserName, suiteId);
     return run.id;
   }
 
   /**
    * Publishes results of execution of an automated test run
-   * @param {string} name
-   * @param {string} description
+   * @param {Date} executionDateTime
+   * @param {string} runName
+   * @param {Object} descriptionData
    * @param {string} suiteId
    * @param {[]} results
    * @param {callback} callback
    */
-  publish(name, description, suiteId, results, callback = undefined) {
-    const runId = this.getRunId(results[0].browserName) || this.addRun(name, description, results[0].browserName, suiteId);
+  publish(executionDateTime,
+          runName = 'WebDriver.io test rail reporter',
+          descriptionData,
+          suiteId,
+          results,
+          callback = undefined) {
+    const {passed, failed, pending, total} = descriptionData;
+    let name = `${runName} on ${results[0].browserName}, ${this._getSuiteName(suiteId)}: automated test run ${executionDateTime}`;
+    let description = `${name}
+	  Execution summary:
+	  Passes: ${passed}
+  	Fails: ${failed}
+	  Pending: ${pending}
+	  Total: ${total}
+	  `;
+    this.getRunId(results[0].browserName, suiteId) || this.addRun(name, description, results[0].browserName, suiteId);
+    const runId = this.getRunId(results[0].browserName, suiteId);
+    if (runId === null) {
+      throw new Error(`Couldn't get run id`);
+    }
     console.log(`Publishing results to ${this.base}?/runs/view/${runId}`);
     let body = this.addResultsForCases(runId, results);
     // execute callback if specified
     if (callback) {
       callback(body);
     }
+  }
+
+  /**
+   * @return {*}
+   */
+  getSuites() {
+    return this._get(`get_suites/${this.options.projectId}`);
   }
 
   /**
@@ -189,16 +214,27 @@ class TestRail {
   }
 
 
-  getRunId(browserName) {
-    const path = this.runIdPath + browserName;
+  getRunId(browserName, suiteId) {
+    const path = this.runIdPath + browserName + suiteId;
     return fs.existsSync(path)
       ? fs.readFileSync(path)
       : null;
   }
 
-  writeRunId(id, browserName) {
-    fs.writeFileSync(this.runIdPath + browserName, id);
+  writeRunId(id, browserName, suiteId) {
+    fs.writeFileSync(this.runIdPath + browserName + suiteId, id);
   }
+
+  /**
+   * @param {string} suiteId
+   * @return {string}
+   */
+  _getSuiteName(suiteId) {
+    const allSuites = this.getSuites();
+    const suite = allSuites.find(suite => suite.id == suiteId);
+    return suite.name || 'unknown suite;'
+  }
+
 }
 
 module.exports = TestRail;
