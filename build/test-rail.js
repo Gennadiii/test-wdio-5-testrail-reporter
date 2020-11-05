@@ -14,13 +14,24 @@ class TestRail {
     this._validate(options, 'username');
     this._validate(options, 'password');
     this._validate(options, 'projectId');
+    this._validate(options, 'timestamp');
 
     // compute base url
     this.options = options;
     this.base = `https://${options.domain}/index.php`;
-    this.runIdPath = `${__dirname}/${options.timestamp}`;
+    this.runIdPath = `${__dirname}/${this._getTimestamp()}`;
   }
 
+
+  /**
+   * @return {string}
+   * @private
+   */
+  _getTimestamp() {
+    return fs.existsSync(`${__dirname}/timestamp`)
+      ? fs.readFileSync(`${__dirname}/timestamp`).toString()
+      : (fs.writeFileSync(`${__dirname}/timestamp`, this.options.timestamp), this.options.timestamp);
+  }
 
   /**
    * @param {{}} options
