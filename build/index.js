@@ -16,7 +16,8 @@ function _interopRequireDefault(obj) {
 function titleToSuiteId(title) {
   const match = title.match(/\bT?S(\d+)\b/g);
   if (!match) {
-    throw new Error(`Suite id is not detected in test name`);
+    console.warn(`Suite id is not detected in test name`);
+    return null;
   }
   return match[0];
 }
@@ -78,6 +79,9 @@ class TestRailReporter extends _reporter.default {
     this._out.push(test.title + ': pass');
     let caseIds = titleToCaseIds(test.title);
     let suiteId = titleToSuiteId(test.fullTitle) || this.options.suiteId;
+    if (!suiteId) {
+      return;
+    }
     if (caseIds.length > 0) {
       let results = caseIds.map(caseId => {
         return {
@@ -97,6 +101,9 @@ class TestRailReporter extends _reporter.default {
     this._out.push(test.title + ': fail');
     let caseIds = titleToCaseIds(test.title);
     let suiteId = titleToSuiteId(test.fullTitle) || this.options.suiteId;
+    if (!suiteId) {
+      return;
+    }
     if (caseIds.length > 0) {
       let results = caseIds.map(caseId => {
         return {
@@ -120,6 +127,9 @@ class TestRailReporter extends _reporter.default {
     this._out.push(test.title + ': skipped');
     let caseIds = titleToCaseIds(test.title);
     let suiteId = titleToSuiteId(test.fullTitle) || this.options.suiteId;
+    if (!suiteId) {
+      return;
+    }
     if (caseIds.length > 0) {
       let results = caseIds.map(caseId => {
         return {
