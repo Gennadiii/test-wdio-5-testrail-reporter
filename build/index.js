@@ -8,6 +8,14 @@ let TestRail = require('./test-rail');
 let titleToCaseIds = require('mocha-testrail-reporter/dist/lib/shared').titleToCaseIds;
 let Status = require('mocha-testrail-reporter/dist/lib/testrail.interface').Status;
 const _reporter = _interopRequireDefault(require("@wdio/reporter"));
+const fs = require('fs');
+
+
+const failedTestDirPath = `${__dirname}/failedTests`;
+
+function clearFailedState() {
+  fs.rmdirSync(failedTestDirPath, {recursive: true});
+}
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {default: obj};
@@ -42,6 +50,8 @@ class TestRailReporter extends _reporter.default {
 
     super(options); // Keep track of the order that suites were called
 
+    fs.existsSync(failedTestDirPath) || fs.mkdirSync(failedTestDirPath);
+
     this.stateCounts = {
       passed: 0,
       failed: 0,
@@ -74,6 +84,10 @@ class TestRailReporter extends _reporter.default {
   }
 
   onTestPass(test) {
+    const failedTests = fs.readdirSync(failedTestDirPath);
+    if (failedTests.includes(test.title)) {
+      return;
+    }
     this.stateCounts.passed++;
     this._passes++;
     this._out.push(test.title + ': pass');
@@ -97,6 +111,7 @@ class TestRailReporter extends _reporter.default {
   }
 
   onTestFail(test) {
+    fs.writeFileSync(`${failedTestDirPath}/${test.title}`);
     this._fails++;
     this._out.push(test.title + ': fail');
     let caseIds = titleToCaseIds(test.title);
@@ -166,3 +181,4 @@ class TestRailReporter extends _reporter.default {
 
 var _default = TestRailReporter;
 exports.default = _default;
+module.exports.clearFailedState = clearFailedState;
