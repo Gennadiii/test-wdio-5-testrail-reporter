@@ -14,7 +14,7 @@ const fs = require('fs');
 const failedTestDirPath = `${__dirname}/failedTests`;
 
 function clearFailedState() {
-  fs.rmdirSync(failedTestDirPath, {recursive: true});
+  fs.existsSync(failedTestDirPath) && fs.rmdirSync(failedTestDirPath, {recursive: true});
 }
 
 function _interopRequireDefault(obj) {
