@@ -233,7 +233,7 @@ class TestRail {
   }
 
   writeRunId(id, browserName, suiteId) {
-    fs.writeFileSync(this.runIdPath + browserName + suiteId, id);
+    fs.writeFileSync(this.runIdPath + browserName + suiteId, String(id));
   }
 
   /**
