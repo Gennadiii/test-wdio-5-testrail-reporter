@@ -84,14 +84,14 @@ class TestRailReporter extends _reporter.default {
   }
 
   onTestPass(test) {
+    let caseIds = titleToCaseIds(test.title);
     const failedTests = fs.readdirSync(failedTestDirPath);
-    if (failedTests.includes(test.title)) {
+    if (failedTests.some(failedTest => caseIds.includes(Number(failedTest)))) {
       return;
     }
     this.stateCounts.passed++;
     this._passes++;
     this._out.push(test.title + ': pass');
-    let caseIds = titleToCaseIds(test.title);
     let suiteId = titleToSuiteId(test.fullTitle) || this.options.suiteId;
     if (!suiteId) {
       return;
@@ -111,10 +111,10 @@ class TestRailReporter extends _reporter.default {
   }
 
   onTestFail(test) {
-    fs.writeFileSync(`${failedTestDirPath}/${test.title}`);
+    let caseIds = titleToCaseIds(test.title);
+    caseIds.forEach(caseId => fs.writeFileSync(`${failedTestDirPath}/${caseId}`, ''))
     this._fails++;
     this._out.push(test.title + ': fail');
-    let caseIds = titleToCaseIds(test.title);
     let suiteId = titleToSuiteId(test.fullTitle) || this.options.suiteId;
     if (!suiteId) {
       return;
