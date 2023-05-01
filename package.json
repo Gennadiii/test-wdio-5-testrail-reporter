@@ -48,7 +48,7 @@
   "main": "./build/index",
   "name": "wdio-5-testrail-reporter",
   "peerDependencies": {
-    "@wdio/cli": "^7.0.0"
+    "@wdio/cli": "^8.8.7"
   },
   "publishConfig": {
     "access": "public"
